@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>نمودار توزیع نرمال و یکنواخت</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <canvas id="myChart" width="600" height="300"></canvas>
+
+  <script>
+    // تابع برای تولید توزیع نرمال (تکنیک Box-Muller)
+    function generateNormalData(mean, stdDev, count) {
+      let data = [];
+      for (let i = 0; i < count; i++) {
+        let u = 1 - Math.random();
+        let v = Math.random();
+        let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        data.push(z * stdDev + mean);
+      }
+      return data;
+    }
+
+    // تولید داده‌ها
+    const normalData = generateNormalData(1.2, 0.5, 200);
+    const uniformData = Array.from({length: 200}, () => Math.random() * (2.0 - 0.5) + 0.5);
+
+    // آماده‌سازی داده‌ها برای نمایش در قالب histogram
+    function buildHistogram(data, step = 0.2, min = 0, max = 3) {
+      let bins = [];
+      for (let x = min; x < max; x += step) {
+        bins.push({ label: `${x.toFixed(1)} - ${(x + step).toFixed(1)}`, count: 0 });
+      }
+      data.forEach(val => {
+        let i = Math.floor((val - min) / step);
+        if (i >= 0 && i < bins.length) bins[i].count++;
+      });
+      return bins;
+    }
+
+    const histNormal = buildHistogram(normalData);
+    const histUniform = buildHistogram(uniformData);
+
+    // آماده‌سازی داده‌ها برای chart.js
+    const labels = histNormal.map(b => b.label);
+    const normalCounts = histNormal.map(b => b.count);
+    const uniformCounts = histUniform.map(b => b.count);
+
+    // رسم نمودار
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'توزیع نرمال',
+            data: normalCounts,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+          },
+          {
+            label: 'توزیع یکنواخت',
+            data: uniformCounts,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'مقایسه توزیع نرمال و یکنواخت'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
