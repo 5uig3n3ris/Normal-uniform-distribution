@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>مقایسه توزیع‌ها در امور مالی</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h3>مقایسه‌ی نرمال، لگ‌نرمال و نمایی (نمونه‌های شبیه‌سازی شده)</h3>
+  <canvas id="distChart" width="800" height="400"></canvas>
+  <div id="stats"></div>
+
+  <script>
+    function generateNormal(mean, stdDev, n) {
+      return Array.from({length: n}, () => {
+        let u = Math.random(), v = Math.random();
+        let z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        return mean + stdDev * z;
+      });
+    }
+
+    function generateLogNormal(mean, stdDev, n) {
+      return Array.from({length: n}, () => {
+        let u = Math.random(), v = Math.random();
+        let z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        return Math.exp(mean + stdDev * z);
+      });
+    }
+
+    function generateExponential(lambda, n) {
+      return Array.from({length: n}, () => -Math.log(1 - Math.random()) / lambda);
+    }
+
+    function calcStats(data) {
+      const mean = data.reduce((a, b) => a + b, 0) / data.length;
+      const variance = data.reduce((a, b) => a + (b - mean) ** 2, 0) / data.length;
+      return { mean, variance };
+    }
+
+    const n = 100;
+    const normal = generateNormal(0.01, 0.04, n);
+    const lognormal = generateLogNormal(0.01, 0.04, n);
+    const exponential = generateExponential(1 / 5, n);
+
+    const labels = Array.from({length: n}, (_, i) => i + 1);
+
+    new Chart(document.getElementById("distChart"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "نرمال",
+            data: normal,
+            borderColor: "green",
+            fill: false
+          },
+          {
+            label: "لگ-نرمال",
+            data: lognormal,
+            borderColor: "blue",
+            fill: false
+          },
+          {
+            label: "نمایی",
+            data: exponential,
+            borderColor: "orange",
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "مقایسه تصویری سه توزیع متداول در امور مالی"
+          }
+        }
+      }
+    });
+
+    const stats = {
+      normal: calcStats(normal),
+      lognormal: calcStats(lognormal),
+      exponential: calcStats(exponential)
+    };
+
+    document.getElementById("stats").innerHTML = `
+      <h4>آمار توصیفی</h4>
+      <ul>
+        <li><b>نرمال</b> - میانگین: ${stats.normal.mean.toFixed(4)}, واریانس: ${stats.normal.variance.toFixed(4)}</li>
+        <li><b>لگ‌نرمال</b> - میانگین: ${stats.lognormal.mean.toFixed(4)}, واریانس: ${stats.lognormal.variance.toFixed(4)}</li>
+        <li><b>نمایی</b> - میانگین: ${stats.exponential.mean.toFixed(4)}, واریانس: ${stats.exponential.variance.toFixed(4)}</li>
+      </ul>
+    `;
+  </script>
+</body>
+</html>
