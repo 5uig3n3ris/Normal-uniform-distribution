@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>شبیه‌سازی زمان رخداد با توزیع نمایی</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h3>مدلسازی زمان بین رخدادها با توزیع نمایی</h3>
+  <p>میانگین زمان بین دو رخداد: 5 روز</p>
+  <canvas id="expChart" width="800" height="400"></canvas>
+
+  <script>
+    function generateExponentialSamples(lambda = 1/5, count = 30) {
+      const samples = [];
+      for (let i = 0; i < count; i++) {
+        let u = Math.random();
+        let time = -Math.log(1 - u) / lambda;
+        samples.push(time);
+      }
+      return samples;
+    }
+
+    const times = generateExponentialSamples();
+    const labels = times.map((_, i) => `رخداد ${i + 1}`);
+
+    new Chart(document.getElementById('expChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'زمان بین دو رخداد (روز)',
+          data: times,
+          backgroundColor: 'orange'
+        }]
+      },
+      options: {
+        scales: {
+          y: { title: { display: true, text: 'روز' } }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'مدل‌سازی فاصله زمانی رخدادها با توزیع نمایی'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
