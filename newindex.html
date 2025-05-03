@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Financial Distributions Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>توزیع‌های آماری در امور مالی</h2>
+  <canvas id="distChart" width="1000" height="500"></canvas>
+
+  <script>
+    function generateData(func, range, step = 0.1) {
+      const data = [];
+      for (let x = range[0]; x <= range[1]; x += step) {
+        data.push({ x: x, y: func(x) });
+      }
+      return data;
+    }
+
+    const dataSets = [
+      {
+        label: 'Normal',
+        borderColor: 'blue',
+        data: generateData(x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI), [-5, 5]),
+      },
+      {
+        label: 'Lognormal',
+        borderColor: 'green',
+        data: generateData(x => x > 0 ? (1 / (x * Math.sqrt(2 * Math.PI))) * Math.exp(-Math.pow(Math.log(x), 2) / 2) : 0, [0.1, 5]),
+      },
+      {
+        label: 'Uniform',
+        borderColor: 'orange',
+        data: generateData(x => (x >= -2 && x <= 2) ? 1/4 : 0, [-5, 5]),
+      },
+      {
+        label: 'Exponential',
+        borderColor: 'purple',
+        data: generateData(x => x >= 0 ? Math.exp(-x) : 0, [0, 5]),
+      },
+      {
+        label: "Student's t",
+        borderColor: 'red',
+        data: generateData(x => {
+          const df = 3;
+          return (1 / (Math.sqrt(df) * Math.pow(1 + (x * x) / df, (df + 1) / 2))) * 0.4;
+        }, [-5, 5]),
+      }
+    ];
+
+    new Chart(document.getElementById('distChart'), {
+      type: 'line',
+      data: {
+        datasets: dataSets.map(set => ({
+          label: set.label,
+          data: set.data,
+          borderColor: set.borderColor,
+          fill: false,
+        })),
+      },
+      options: {
+        scales: {
+          x: { type: 'linear', position: 'bottom', title: { display: true, text: 'مقدار (x)' } },
+          y: { title: { display: true, text: 'چگالی احتمال (PDF)' } }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'مقایسه توزیع‌های آماری در مالی',
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
